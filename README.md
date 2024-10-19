@@ -235,9 +235,10 @@ registerInstrumentations({
 For more information, refer to the [OTel http/https instrumentation document](https://www.npmjs.com/package/@opentelemetry/instrumentation-http).
 
 ## OpenTelemetry Trace Visualization
-![Console trace spans](image.png)
+![Console trace spans](https://github.com/user-attachments/assets/ec9bb460-cd88-4a1b-b61b-ae279ad5ebcc)
 
-![Trace request visualization](image-1.png)
+![Trace request visualization](https://github.com/user-attachments/assets/a9ca0580-660e-49f5-a9b1-73c8f4d68f2e)
+
 
 ## Article Link
 [Medium article](https://medium.com/@sneha_99/opentelemetry-unlocking-powerful-performance-insights-with-default-http-instrumentation-4fd14d5f3e46)
