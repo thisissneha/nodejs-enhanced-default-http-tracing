@@ -6,6 +6,9 @@ Before you begin, make sure you have the following installed on your system:
 
 - **Node.js**: Ensure you have Node.js installed (v16 or higher).
 - npm (Node Package Manager)
+- **AWS credentials** (Access Key ID, Secret Access Key, and region).
+- **S3 bucket** to store user profile JSON files.
+- **DynamoDB table** to store user data.
 
 ## Installation
 1. Clone this repository to your local machine.
@@ -18,6 +21,19 @@ Before you begin, make sure you have the following installed on your system:
     ```bash
     npm install
     ```
+3. Create a .env file in the root directory to store your AWS credentials and other environment variables.  The contents of the .env file should look like this:
+
+    ```bash
+    AWS_ACCESS_KEY_ID=your-access-key-id
+    AWS_SECRET_ACCESS_KEY=your-secret-access-key
+    AWS_REGION=your-region
+    ```
+4. Set up AWS resources
+    1. **S3 Bucket**: Create a bucket in S3 where user profiles will be stored.
+
+    2. **DynamoDB Table**: Create a DynamoDB table to store user records.
+        - **Table name**: Users
+        - **Partition key**: userId (String)
 
 ## Project Structure
 The project consists of two main files:
@@ -40,21 +56,87 @@ Run the application:
 node index.js
 ```
 
-### API Endpoints:
+### API Endpoints
+1. `POST /user`
+    - **Description**: This API stores user data by uploading a profile to S3 and storing additional data in DynamoDB.
 
-1. **GET /users**: Retrieves a list of users.
-2. **POST /users**: Adds a new user. Requires a JSON body with a name field.
+    - **Request Body**:
 
-### Test the Endpoints
-You can test these endpoints using a tool like Postman.
+      ```json
+      {
+          "userId": "123",
+          "profile": {
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "preferences": {
+                  "theme": "dark",
+                  "notifications": true
+              }
+          },
+          "data": {
+              "age": 30,
+              "loyaltyPoints": 150
+          }
+      }
+      ```
+    - **Sample Request**:
 
-Example POST /users Request:
+      ```bash
+      curl -X POST http://localhost:3000/user \
+      -H 'Content-Type: application/json' \
+      -d '{
+          "userId": "123",
+          "profile": {
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "preferences": {
+                  "theme": "dark",
+                  "notifications": true
+              }
+          },
+          "data": {
+              "age": 30,
+              "loyaltyPoints": 150
+          }
+      }'
+      ```
+    - **Response**:
+      ```json
+      {
+          "message": "User data stored successfully"
+      }
+      ```
 
-```bash
-Request Method - POST
-Request URL - "http://localhost:3000/users"
-Request Body - {"name": "John"}
-```
+2. `GET /user/:userId`
+    - **Description**: Fetches user profile from S3 and additional data from DynamoDB.
+
+    - **URL Parameters**:
+      - `userId`: The ID of the user whose data needs to be fetched.
+
+    - **Sample Request**:
+
+      ```bash
+      curl -X GET http://localhost:3000/user/123
+      ```
+
+    - **Response**:
+      ```json
+      {
+          "message": "User data retrieved successfully",
+          "profile": {
+              "name": "John Doe",
+              "email": "john.doe@example.com",
+              "preferences": {
+                  "theme": "dark",
+                  "notifications": true
+              }
+          },
+          "record": {
+              "age": 30,
+              "loyaltyPoints": 150
+          }
+      }
+      ```
 
 ## Tracing Configuartions
 ### Trace Exporter Configurations
@@ -68,7 +150,7 @@ Request Body - {"name": "John"}
     Use the New Relic API keys.
 
 3. **Concurrency Limit:**
-    The default concurrency limit is 30. You can adjust this value according to your use case.
+    It is the number of trace batches that can be sent concurrently to the New Relic. The default concurrency limit is 30. You can adjust this value according to your use case.
 
 #### Usage
 ```JavaScript
@@ -89,16 +171,16 @@ ___________________________________________________________
     Entity Name is the service name of the application.
 
 2. **Max Export Batch Size:**
-    The default max export batch size is 512. You can adjust this value according to your use case.
+    It is the maximum batch size of every export. It must be smaller or equal to max queue size. The default max export batch size is 512. You can adjust this value according to your use case.
 
 3. **Scheduled Delay Millis:**
-    The default scheduled delay in millisecond is 5000. You can adjust this value according to your use case.
+    It is the delay interval in milliseconds between two consecutive exports. The default scheduled delay in millisecond is 5000. You can adjust this value according to your use case.
 
 4. **Export Timeout Millis:**
-    The default export timeout in millisecond is 30000. You can adjust this value according to your use case.
+    It indicates how long the export can run before it is canceled. The default export timeout in millisecond is 30000. You can adjust this value according to your use case.
 
 5. **Max Queue Size:**
-    The default max queue size is 2048. You can adjust this value according to your use case.
+    It is the maximum queue size. After the size is reached spans are dropped. The default max queue size is 2048. You can adjust this value according to your use case.
 
 #### Usage
 ```JavaScript
@@ -152,6 +234,13 @@ registerInstrumentations({
 
 For more information, refer to the [OTel http/https instrumentation document](https://www.npmjs.com/package/@opentelemetry/instrumentation-http).
 
+## OpenTelemetry Trace Visualization
+![Console trace spans](image.png)
+
+![Trace request visualization](image-1.png)
+
+## Article Link
+[Medium article](https://medium.com/@sneha_99/opentelemetry-unlocking-powerful-performance-insights-with-default-http-instrumentation-4fd14d5f3e46)
 
 
 ## Contributing
